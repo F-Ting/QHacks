@@ -13,8 +13,8 @@ var port = 8000;
 
 var router = express.Router();
 
-app.get('/', function(req, res){
-     res.sendFile(path.join(__dirname + '/Test.html'));
+app.get('/', function(req, res) {
+    res.render('Test.html');
 });
 
 app.use('/', router);
