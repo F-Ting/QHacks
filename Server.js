@@ -20,6 +20,7 @@ app.get('/*', function (req, res) {
     res.sendFile('test.html', {root: path.join(__dirname, '/')});
 });
 
+
 app.use('/', router);
 
 app.listen(port);
