@@ -21,6 +21,7 @@
     }
     img {max-width: 100%}
     </style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
 </head>
 
 <body>
@@ -29,8 +30,6 @@
     </div>
 
     <canvas id="canvas" class="hide" height="480" width="640"></canvas>
-
-    <button id="button">Print Saved Image</button>
 
     <img src="" id="imageprint" />
 
@@ -52,8 +51,8 @@
     // If we're given permission to use camera
     function handleVideo(stream) {
         video.src = window.URL.createObjectURL(stream);
-        video.addEventListener('click', takeSnapshot);
-        button.addEventListener('click', printimage);
+        //video.addEventListener('click', takeSnapshot);
+        //button.addEventListener('click', printimage);
     }
 
     // When permissions aren't given or if we have some error
@@ -71,15 +70,20 @@
         canvas.height = height;
 
         context.drawImage(video, 0, 0, width, height);
-        //var img = document.querySelector('img') || document.createElement('img');
-        //var imgprint = document.getElementById('imageprint');
-
-        //img.src = canvas.toDataURL("image/png");
-
         var imgdata = getBase64ImageURL(canvas.toDataURL("image/png"));
+        context.clearRect(0, 0, width, height);
+
+        //Accessing Indico API
+        var emotion = $.post(
+                  'https://apiv2.indico.io/fer',
+                  JSON.stringify({
+                    'api_key': "74fbb029e148b97fbc9235b0c02d368e",
+                    'data': imgdata,
+                    'detect': true
+                  })
+                ).then(function(res) { console.log(res) });
 
         localStorage.setItem("imageData", imgdata);
-
     }
 
     function getBase64ImageURL(img_url) {
@@ -93,6 +97,14 @@
         image.src = "data:image/png;base64," + dataImage;
     }
 
+    (function myLoop (i) {
+        setTimeout(function () {
+
+          takeSnapshot();
+            printimage();
+        if (i) myLoop(i);      //  decrement i and call myLoop again if i > 0
+    }, 2500)
+    })(10);
 
     })();
 </script>
