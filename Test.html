@@ -25,11 +25,16 @@
 <body>
 <div id="container">
     <video autoplay="true" id="videoElement">
-
     </video>
 </div>
+
+<button id="snap"> Snap Photo</button>
+<canvas id="canvas" width="640" height="480"></canvas>
 <script>
 var video = document.querySelector("#videoElement");
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var pic = new Image();
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
@@ -44,6 +49,24 @@ function handleVideo(stream) {
 function videoError(e) {
     // do something
 }
+
+// Trigger photo take
+document.getElementById("snap").addEventListener("click", function() {
+	context.drawImage(video, 0, 0, 640, 480);
+  pic = convertCanvasToImage(context);
+  pic.src = 'picture.jpg';
+
+
+
+});
+
+// Converts canvas to an image
+function convertCanvasToImage(canvas) {
+	var image = new Image();
+	image.src = canvas.toDataURL("image/png");
+	return image;
+}
+
 </script>
 </body>
 </html>

@@ -1,35 +1,23 @@
-var http = require('http');
+// This is an easier version of app.js
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
 var fs = require('fs');
-var url = require('url');
+var path = require("path");
 
-// Create a server
-http.createServer( function (request, response) {
-   // Parse the request containing file name
-   var pathname = url.parse(request.url).pathname;
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.json());
 
-   // Print the name of the file for which request is made.
-   console.log("Request for " + pathname + " received.");
+//set our port number
+var port = 8000;
 
-   // Read the requested file content from file system
-   fs.readFile(pathname.substr(1), function (err, data) {
-      if (err) {
-         console.log(err);
-         // HTTP Status: 404 : NOT FOUND
-         // Content Type: text/plain
-         response.writeHead(404, {'Content-Type': 'text/html'});
-      }else {
-         //Page found
-         // HTTP Status: 200 : OK
-         // Content Type: text/plain
-         response.writeHead(200, {'Content-Type': 'text/html'});
+var router = express.Router();
 
-         // Write the content of the file to response body
-         response.write(data.toString());
-      }
-      // Send the response body
-      response.end();
-   });
-}).listen(8081);
+app.get('/', function(req, res){
+     res.sendFile(path.join(__dirname + '/Test.html'));
+});
 
-// Console will print the message
-console.log('Server running at http://127.0.0.1:8081/');
+app.use('/', router);
+
+app.listen(port);
+console.log('Port ' + port + ' is working');
