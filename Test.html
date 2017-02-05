@@ -1,49 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta content="stuff, to, help, search, engines, not" name="keywords">
-<meta content="What this page is about." name="description">
-<meta content="Display Webcam Stream" name="title">
-<title>Display Webcam Stream</title>
+    <meta charset="UTF-8">
+    <meta content="stuff, to, help, search, engines, not" name="keywords">
+    <meta content="What this page is about." name="description">
+    <meta content="Display Webcam Stream" name="title">
+    <title>Display Webcam Stream</title>
 
-<style>
-#container {
-    margin: 0px auto;
-    width: 500px;
-    height: 375px;
-    border: 10px #333 solid;
-}
-#videoElement {
-    width: 500px;
-    height: 375px;
-    background-color: #666;
-}
-</style>
+    <style>
+    #container {
+        margin: 0px auto;
+        width: 500px;
+        height: 375px;
+        border: 10px #333 solid;
+    }
+    #videoElement {
+        width: 500px;
+        height: 375px;
+        background-color: #666;
+    }
+    img {max-width: 100%}
+    </style>
 </head>
 
 <body>
-<div id="container">
-    <video autoplay="true" id="videoElement">
+    <div id="container">
+        <video autoplay="true" id="videoElement"></video>
+    </div>
 
-    </video>
-</div>
+    <canvas id="canvas" class="hide" height="480" width="640"></canvas>
+
+    <button id="button">Print Saved Image</button>
+
+    <img src="" id="imageprint" />
+
 <script>
-var video = document.querySelector("#videoElement");
+    (function(){
+        'use strict';
 
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+    var video = document.querySelector('#videoElement'), canvas;
 
-if (navigator.getUserMedia) {
-    navigator.getUserMedia({video: true}, handleVideo, videoError);
-}
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+    // MediaDevices API 
+    if (navigator.mediaDevices) {
+        // accesses webcam
+        navigator.mediaDevices.getUserMedia({video: true, audio: false})
+         .then(handleVideo)
+         .catch(videoError);
+    }
 
-function handleVideo(stream) {
-    video.src = window.URL.createObjectURL(stream);
-}
+    // If we're given permission to use camera
+    function handleVideo(stream) {
+        video.src = window.URL.createObjectURL(stream);
+        video.addEventListener('click', takeSnapshot);
+        button.addEventListener('click', printimage);
+    }
 
-function videoError(e) {
-    // do something
-}
+    // When permissions aren't given or if we have some error
+    function videoError(e) {
+        document.body.textContent = 'Error: Failed to access camera' + e.name;
+    }
+
+    function takeSnapshot() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var width = video.offsetWidth, 
+            height = video.offsetHeight;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        context.drawImage(video, 0, 0, width, height);
+        //var img = document.querySelector('img') || document.createElement('img');
+        //var imgprint = document.getElementById('imageprint');
+
+        //img.src = canvas.toDataURL("image/png");
+
+        var imgdata = getBase64ImageURL(canvas.toDataURL("image/png"));
+
+        localStorage.setItem("imageData", imgdata);
+    }
+
+    function getBase64ImageURL(img_url) {
+        // Converts to Base64
+        return img_url.replace(/^data:image\/(png|jpg);base64,/, "");
+    }
+    
+    function printimage() {
+        var dataImage = localStorage.getItem('imageData');
+        var image = document.getElementById('imageprint');
+        image.src = "data:image/png;base64," + dataImage;
+    }
+
+    })();
 </script>
 </body>
 </html>
