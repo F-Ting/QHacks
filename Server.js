@@ -13,8 +13,11 @@ var port = 8000;
 
 var router = express.Router();
 
-app.get('/', function(req, res) {
-    res.render('Test.html');
+//Look for statics first
+app.use(express.static(path.join(__dirname, '/')));
+//Return the index for any other GET request
+app.get('/*', function (req, res) {
+    res.sendFile('test.html', {root: path.join(__dirname, '/')});
 });
 
 app.use('/', router);
