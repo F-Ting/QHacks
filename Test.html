@@ -2,21 +2,18 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta content="stuff, to, help, search, engines, not" name="keywords">
-    <meta content="What this page is about." name="description">
-    <meta content="Display Webcam Stream" name="title">
-    <title>Display Webcam Stream</title>
+    <title>Emotion Tracker</title>
 
     <style>
     #container {
         margin: 0px auto;
-        width: 500px;
-        height: 375px;
+        width: 100px;
+        height: 75px;
         border: 10px #333 solid;
     }
     #videoElement {
-        width: 500px;
-        height: 375px;
+        width: 100px;
+        height: 75px;
         background-color: #666;
     }
     img {max-width: 100%}
@@ -28,6 +25,7 @@
     <div id="container">
         <video autoplay="true" id="videoElement"></video>
     </div>
+    <div> <h1 id="emotion"></h1> </div>
 
     <canvas id="canvas" class="hide" height="480" width="640"></canvas>
 
@@ -74,6 +72,7 @@
         context.clearRect(0, 0, width, height);
 
         //Accessing Indico API
+        var current_emo = "";
         var emotion = $.post(
                   'https://apiv2.indico.io/fer',
                   JSON.stringify({
@@ -81,7 +80,27 @@
                     'data': imgdata,
                     'detect': true
                   })
-                ).then(function(res) { console.log(res) });
+                ).then(function(res) { 
+            var results = JSON.parse(res);
+            if (results.results != ""){
+                var emotions = results.results[0].emotions;
+                var highest_emo_num = 0;
+                var predicted_emotion = "";
+                for (var key in emotions){
+                    if(emotions[key] > highest_emo_num){
+                        highest_emo_num = emotions[key];
+                        predicted_emotion = key;
+                    }
+                }
+                //console.log(predicted_emotion);
+                current_emo = predicted_emotion;
+            }
+            else{
+                //console.log("unable to detect")
+                current_emo = "unable to detect";
+            }
+        document.getElementById('emotion').innerHTML = current_emo;
+        });
 
 
         localStorage.setItem("imageData", imgdata);
@@ -102,7 +121,7 @@
         setTimeout(function () {
 
           takeSnapshot();
-            printimage();
+            //printimage();
         if (i) myLoop(i);      //  decrement i and call myLoop again if i > 0
     }, 2500)
     })(10);
